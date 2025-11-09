@@ -290,5 +290,84 @@ Access via:
 
 ---
 
+Apache can’t start because the log directory **`/var/log/apache2/`** is missing.
 
+Let’s fix it step-by-step 👇
+
+---
+
+### 🧰 Step 1 — Create the missing log directory
+
+Run:
+
+```bash
+sudo mkdir -p /var/log/apache2
+sudo chown -R www-data:adm /var/log/apache2
+sudo chmod 750 /var/log/apache2
+```
+
+---
+
+### 🧱 Step 2 — Verify Apache config
+
+Just to ensure no syntax issue:
+
+```bash
+sudo apache2ctl configtest
+```
+
+If you see:
+
+```
+Syntax OK
+```
+
+✅ it’s good.
+
+---
+
+### 🧩 Step 3 — Restart Apache
+
+```bash
+sudo systemctl restart apache2
+```
+
+Now check again:
+
+```bash
+sudo systemctl status apache2
+```
+
+If it says `active (running)`, you’re done!
+Open in browser → **[http://localhost](http://localhost)**
+
+---
+
+### 🧰 Step 4 (Optional but recommended)
+
+Fix the “Could not reliably determine the server's fully qualified domain name” warning by adding this line:
+
+```bash
+echo "ServerName localhost" | sudo tee /etc/apache2/conf-available/fqdn.conf
+sudo a2enconf fqdn
+sudo systemctl reload apache2
+```
+
+---
+
+### ✅ Verify it’s working
+
+```bash
+curl http://localhost
+```
+
+You should see the default Apache HTML page contents.
+
+---
+
+If it **still fails** after this, run:
+
+```bash
+sudo journalctl -xeu apache2.service | tail -n 20
+```
 
