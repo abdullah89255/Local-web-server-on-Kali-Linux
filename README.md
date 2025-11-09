@@ -126,3 +126,169 @@ sudo apache2ctl configtest
 
 ---
 
+## 🧩 Step 1 — Install all required packages
+
+Run this in your terminal:
+
+```bash
+sudo apt update
+sudo apt install apache2 mariadb-server php libapache2-mod-php php-mysql php-xml php-gd php-curl php-zip php-mbstring unzip wget -y
+```
+
+This installs:
+
+* **Apache2** → web server
+* **MariaDB** → database
+* **PHP + common modules** → to run WordPress/PHP apps
+
+---
+
+## ⚙️ Step 2 — Start and enable services
+
+```bash
+sudo systemctl start apache2
+sudo systemctl start mariadb
+sudo systemctl enable apache2
+sudo systemctl enable mariadb
+```
+
+Check Apache status:
+
+```bash
+sudo systemctl status apache2
+```
+
+✅ If “active (running)” → you’re good.
+
+Now open in browser:
+👉 [http://localhost](http://localhost)
+You should see **“Apache2 Default Page”**.
+
+---
+
+## 🔐 Step 3 — Secure MariaDB
+
+Set up a password and remove insecure defaults:
+
+```bash
+sudo mysql_secure_installation
+```
+
+Follow prompts:
+
+* Set root password → **Yes**
+* Remove anonymous users → **Yes**
+* Disallow root login remotely → **Yes**
+* Remove test database → **Yes**
+* Reload privileges → **Yes**
+
+---
+
+## 🗄️ Step 4 — Create a database for WordPress
+
+Enter MariaDB shell:
+
+```bash
+sudo mysql -u root -p
+```
+
+Then run these SQL commands (replace `wpuser` and `password` as you like):
+
+```sql
+CREATE DATABASE wordpress;
+CREATE USER 'wpuser'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wpuser'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+---
+
+## 🌐 Step 5 — Download and install WordPress
+
+```bash
+cd /tmp
+wget https://wordpress.org/latest.zip
+unzip latest.zip
+sudo mv wordpress /var/www/html/
+sudo chown -R www-data:www-data /var/www/html/wordpress
+sudo chmod -R 755 /var/www/html/wordpress
+```
+
+---
+
+## 🧾 Step 6 — Configure Apache for WordPress
+
+Create a new site config:
+
+```bash
+sudo nano /etc/apache2/sites-available/wordpress.conf
+```
+
+Paste this:
+
+```apache
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html/wordpress
+    ServerName localhost
+
+    <Directory /var/www/html/wordpress/>
+        AllowOverride All
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/wordpress_error.log
+    CustomLog ${APACHE_LOG_DIR}/wordpress_access.log combined
+</VirtualHost>
+```
+
+Save (Ctrl+O, Enter, Ctrl+X).
+
+Enable the site and rewrite module:
+
+```bash
+sudo a2ensite wordpress.conf
+sudo a2enmod rewrite
+sudo systemctl restart apache2
+```
+
+---
+
+## 🛠️ Step 7 — WordPress setup via browser
+
+Open:
+👉 **[http://localhost/wordpress](http://localhost/wordpress)**
+
+You’ll see the WordPress setup page.
+
+Fill in:
+
+* Database Name: `wordpress`
+* Username: `wpuser`
+* Password: `password`
+* Database Host: `localhost`
+* Table Prefix: `wp_`
+
+Click **Submit → Run the installation → Create admin user.**
+
+Done! 🎉
+You now have **WordPress running locally on Kali**.
+
+---
+
+## 🧩 Step 8 (optional) — Run any other PHP app
+
+Place any PHP app in `/var/www/html/myapp`, then:
+
+```bash
+sudo chown -R www-data:www-data /var/www/html/myapp
+sudo chmod -R 755 /var/www/html/myapp
+```
+
+Access via:
+👉 [http://localhost/myapp](http://localhost/myapp)
+
+---
+
+
+
