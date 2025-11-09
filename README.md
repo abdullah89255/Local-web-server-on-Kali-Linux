@@ -126,4 +126,3 @@ sudo apache2ctl configtest
 
 ---
 
-If you tell me what you want to run (static files, PHP app, Node app, WordPress, or something else), I’ll give the exact commands and a minimal example config for that case. Ready to help set up whichever you choose. 🚀
